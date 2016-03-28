@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>adb06aaa-8748-4bd8-b23e-0ed6ab2b8c23</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PythonPrototype_VisualStudio.py</StartupFile>
+    <StartupFile>tutorial_1.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,7 +24,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PythonPrototype_VisualStudio.py" />
+    <Compile Include="tutorial_1.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\2.7" />
