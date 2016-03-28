@@ -127,9 +127,10 @@ def animate_pendulum(i):
 fig_plots = plt.figure()
 
 ax_theta1 = fig_plots.add_subplot(411, xlim=(0, 4), ylim=(-7, 7))
-ax_omega1 = fig_plots.add_subplot(412, xlim=(0, 4), ylim=(-7, 7))
-ax_theta2 = fig_plots.add_subplot(413, xlim=(0, 4), ylim=(-7, 7))
-ax_omega2 = fig_plots.add_subplot(414, xlim=(0, 4), ylim=(-7, 7))
+ax_omega1 = fig_plots.add_subplot(412, sharex=ax_theta1, ylim=(-7, 7))
+ax_theta2 = fig_plots.add_subplot(413, sharex=ax_theta1, ylim=(-7, 7))
+ax_omega2 = fig_plots.add_subplot(414, sharex=ax_theta1, ylim=(-7, 7))
+ax_theta1.set_xlim(0, 4)
 
 ax_theta1.grid()
 ax_omega1.grid()
@@ -142,22 +143,28 @@ line_theta2, = ax_theta2.plot([], [])
 line_omega2, = ax_omega2.plot([], [])
 
 ax_theta1.set_xlabel('time (s)')
-ax_theta1.set_ylabel('theta of inner pendulum')
+ax_theta1.set_ylabel('theta1')
 
 ax_omega1.set_xlabel('time (s)')
-ax_omega1.set_ylabel('omega of inner pendulum')
+ax_omega1.set_ylabel('omega1')
 
 ax_theta2.set_xlabel('time (s)')
-ax_theta2.set_ylabel('theta of outer pendulum')
+ax_theta2.set_ylabel('theta2')
 
 ax_omega2.set_xlabel('time (s)')
-ax_omega2.set_ylabel('omega of outer pendulum')
+ax_omega2.set_ylabel('omega2')
 
-theta1_data = []
-omega1_data = []
-theta2_data = []
-omega2_data = []
-plot_time   = []
+theta1_data = np.array([])
+omega1_data = np.array([])
+theta2_data = np.array([])
+omega2_data = np.array([])
+plot_time   = np.array([])
+# the following variables keep track of our axis limits so we can scale them when needed
+axis_xlim   = 4.0
+theta1_max  = 7.0
+theta2_max  = 7.0
+omega1_max  = 7.0
+omega2_max  = 7.0
 
 def init_plot():
     """initialize animation"""
@@ -170,19 +177,28 @@ def init_plot():
 
 def animate_plot(i):
     """perform animation step"""
-    global pendulum, dt, theta1_data, theta2_data, omega1_data, omega_data, plot_time
+    global pendulum, dt, theta1_data, theta2_data, omega1_data, omega2_data, plot_time, ax_theta1, axis_xlim, fig_plots
     
-    theta1_data.append(pendulum.state[0])
-    omega1_data.append(pendulum.state[1])
-    theta2_data.append(pendulum.state[2])
-    omega2_data.append(pendulum.state[3])
-    plot_time.append(pendulum.time_elapsed)
+    # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
+    theta1_data = np.append(theta1_data, pendulum.state[0])
+    omega1_data = np.append(omega1_data, pendulum.state[1])
+    theta2_data = np.append(theta2_data, pendulum.state[2])
+    omega2_data = np.append(omega2_data, pendulum.state[3])
+    plot_time   = np.append(plot_time, pendulum.time_elapsed)
+    
+    # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
+    if(pendulum.time_elapsed > axis_xlim - 1):
+        axis_xlim += 2.0 # this number moves the x axis of all plots by a given amount
+        ax_theta1.set_xlim(0, axis_xlim)
+        fig_plots.show()
+
+    # update the y-axis of each plot by a certain amount if the max or min is going off the plot
 
     line_theta1.set_data(plot_time, theta1_data)
     line_omega1.set_data(plot_time, omega1_data)
     line_theta2.set_data(plot_time, theta2_data)
     line_omega2.set_data(plot_time, omega2_data)
-    return line_theta1, line_omega1, line_theta2, line_omega2
+    return line_theta1, line_omega1, line_theta2, line_omega2#, ax_theta1
 
 # choose the interval based on dt and the time to animate one step
 from time import time
