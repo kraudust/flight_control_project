@@ -66,7 +66,7 @@ class DoublePendulum:
 
         cos_delta = cos(state[2] - state[0])
         sin_delta = sin(state[2] - state[0])
-        dry_friction = 0.5;
+        dry_friction = 0.1;
 
         friction = 0.2
 
@@ -162,9 +162,13 @@ plot_time   = np.array([])
 # the following variables keep track of our axis limits so we can scale them when needed
 axis_xlim   = 4.0
 theta1_max  = 7.0
+theta1_min  =-7.0
 theta2_max  = 7.0
+theta2_min  =-7.0
 omega1_max  = 7.0
+omega1_min  =-7.0
 omega2_max  = 7.0
+omega2_min  =-7.0
 
 def init_plot():
     """initialize animation"""
@@ -178,7 +182,7 @@ def init_plot():
 def animate_plot(i):
     """perform animation step"""
     global pendulum, dt, theta1_data, theta2_data, omega1_data, omega2_data, plot_time, ax_theta1, axis_xlim, fig_plots
-    
+    global theta1_max, theta1_min, theta2_max, theta2_min, omega1_max, omega1_min, omega2_max, omega2_min
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
     theta1_data = np.append(theta1_data, pendulum.state[0])
     omega1_data = np.append(omega1_data, pendulum.state[1])
@@ -187,12 +191,60 @@ def animate_plot(i):
     plot_time   = np.append(plot_time, pendulum.time_elapsed)
     
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
+    need_to_plot = False
     if(pendulum.time_elapsed > axis_xlim - 1):
         axis_xlim += 2.0 # this number moves the x axis of all plots by a given amount
         ax_theta1.set_xlim(0, axis_xlim)
-        fig_plots.show()
+        need_to_plot = True
 
     # update the y-axis of each plot by a certain amount if the max or min is going off the plot
+    # theta1 check
+    if(theta1_min > theta1_data.min()):
+        theta1_min = theta1_data.min() - 1.0
+        ax_theta1.set_ylim(theta1_min, theta1_max)
+        need_to_plot = True
+
+    if(theta1_max < theta1_data.max()):
+        theta1_max = theta1_data.max() + 1.0
+        ax_theta1.set_ylim(theta1_min, theta1_max)
+        need_to_plot = True
+
+    # omega1 check
+    if(omega1_min > omega1_data.min()):
+        omega1_min = omega1_data.min() - 1.0
+        ax_omega1.set_ylim(omega1_min, omega1_max)
+        need_to_plot = True
+
+    if(omega1_max < omega1_data.max()):
+        omega1_max = omega1_data.max() + 1.0
+        ax_omega1.set_ylim(omega1_min, omega1_max)
+        need_to_plot = True
+
+    # theta2 check
+    if(theta2_min > theta2_data.min()):
+        theta2_min = theta2_data.min() - 1.0
+        ax_theta2.set_ylim(theta2_min, theta2_max)
+        need_to_plot = True
+
+    if(theta2_max < theta2_data.max()):
+        theta2_max = theta2_data.max() + 1.0
+        ax_theta2.set_ylim(theta2_min, theta2_max)
+        need_to_plot = True
+
+    # omega2 check
+    if(omega2_min > omega2_data.min()):
+        omega2_min = omega2_data.min() - 1.0
+        ax_omega2.set_ylim(omega2_min, omega2_max)
+        need_to_plot = True
+
+    if(omega2_max < omega2_data.max()):
+        omega2_max = omega2_data.max() + 1.0
+        ax_omega2.set_ylim(omega2_min, omega2_max)
+        need_to_plot = True
+        
+    # update the plot if any of the axis limits have changed
+    if need_to_plot:
+        fig_plots.show()
 
     line_theta1.set_data(plot_time, theta1_data)
     line_omega1.set_data(plot_time, omega1_data)
