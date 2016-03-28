@@ -19,7 +19,7 @@ fig = plt.figure()
 ax = plt.axes(xlim=(0, 2), ylim=(-2, 2))
 line, = ax.plot([], [], lw=2)
 
-# initialization function: plot the background of each frame
+# initialization function: plot the background of each frame, returns which objects will continue to be updated
 def init():
     line.set_data([], [])
     return line,
