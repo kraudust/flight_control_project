@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>adb06aaa-8748-4bd8-b23e-0ed6ab2b8c23</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>elastic_collisions.py</StartupFile>
+    <StartupFile>scotts_prototype.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,6 +28,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="double_pendulum.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="scotts_prototype.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="sinewave.py">
