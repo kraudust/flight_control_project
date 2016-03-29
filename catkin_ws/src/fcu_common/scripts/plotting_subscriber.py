@@ -26,7 +26,7 @@ class state_subscriber():
 		self.we = None
 		#------------------------------------------------------------
 		
-		self.rate = 10 # 100 hz
+		self.rate = 10 # 10 hz
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
 
 	def callback(self, FW_State):
