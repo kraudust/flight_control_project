@@ -3,6 +3,7 @@
 import rospy
 #from std_msgs.msg import String
 from fcu_common.msg import FW_State
+from rosgraph_msgs.msg import Clock
 
 #stuff we need for plotting
 from numpy import sin, cos
@@ -31,11 +32,11 @@ class state_subscriber():
 		self.Vg = None
 		self.wn = None
 		self.we = None
-        self.time = None
+		self.time = None
 		#------------------------------------------------------------
-		
-		self.rate = 10 # 10 hz
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
+		rospy.Subscriber("/clock", Clock, self.callback_time)
+		self.rate = 100 # 100 hz
 
 	def callback(self, FW_State):
 		self.pn = FW_State.position[0]
@@ -55,12 +56,8 @@ class state_subscriber():
 		self.wn = FW_State.wn
 		self.we = FW_State.we
 		
-		
-	def listener():
-		rospy.init_node('plotter', anonymous=True)
-		# spin() simply keeps python from exiting until this node is stopped
-		rospy.spin()
-		#print data
+	def callback_time(self, Clock):
+		self.time = Clock.clock
 		
 	def print_states(self):
 		print "pn: ", self.pn
@@ -78,13 +75,19 @@ class state_subscriber():
 		print "r:", self.r
 		print "Vg:", self.Vg
 		print "wn:", self.wn
-		print "we:", self.we, '\n'
+		print "we:", self.we
+		if self.time == None:
+		    #do nothing
+		    eric = 7
+		else:
+		    print "time: ", self.time.to_sec(), '\n'
 		
 rospy.init_node('plotter', anonymous=True)
 states = state_subscriber()
 #------------------------------------------------------------
 # set up figure and animation for plotting of pendulum states
-fig_plots = plt.figure()
+fig_plots1 = plt.figure()
+fig_plots2 = plt.figure()
 
 ax_pn    = fig_plots.add_subplot([16,1,1], xlim=(0, 4), ylim=(-7, 7))
 ax_pe    = fig_plots.add_subplot([16,1,2], sharex=ax_pn, ylim=(-7, 7))
@@ -467,7 +470,7 @@ from time import time
 t0 = time()
 animate_plot(0)
 t1 = time()
-interval = 1000 * dt - (t1 - t0)
+interval = 1000 * (1./30.) - (t1 - t0)
 
 ani_plot = animation.FuncAnimation(fig_plots, animate_plot, frames=300,
                               interval=interval, blit=True, init_func=init_plot)
