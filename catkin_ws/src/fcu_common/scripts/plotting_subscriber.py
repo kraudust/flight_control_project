@@ -89,22 +89,22 @@ states = state_subscriber()
 fig_plots1 = plt.figure()
 fig_plots2 = plt.figure()
 
-ax_pn    = fig_plots.add_subplot([16,1,1], xlim=(0, 4), ylim=(-7, 7))
-ax_pe    = fig_plots.add_subplot([16,1,2], sharex=ax_pn, ylim=(-7, 7))
-ax_pd    = fig_plots.add_subplot([16,1,3], sharex=ax_pn, ylim=(-7, 7))
-ax_Va    = fig_plots.add_subplot([16,1,4], sharex=ax_pn, ylim=(-7, 7))
-ax_alpha = fig_plots.add_subplot([16,1,5], sharex=ax_pn, ylim=(-7, 7))
-ax_beta  = fig_plots.add_subplot([16,1,6], sharex=ax_pn, ylim=(-7, 7))
-ax_phi   = fig_plots.add_subplot([16,1,7], sharex=ax_pn, ylim=(-7, 7))
-ax_theta = fig_plots.add_subplot([16,2,8], sharex=ax_pn, ylim=(-7, 7))
-ax_psi   = fig_plots.add_subplot([16,1,8], sharex=ax_pn, ylim=(-7, 7))
-ax_chi   = fig_plots.add_subplot([16,2,1], sharex=ax_pn, ylim=(-7, 7))
-ax_p     = fig_plots.add_subplot([16,2,2], sharex=ax_pn, ylim=(-7, 7))
-ax_q     = fig_plots.add_subplot([16,2,3], sharex=ax_pn, ylim=(-7, 7))
-ax_r     = fig_plots.add_subplot([16,2,4], sharex=ax_pn, ylim=(-7, 7))
-ax_Vg    = fig_plots.add_subplot([16,2,5], sharex=ax_pn, ylim=(-7, 7))
-ax_wn    = fig_plots.add_subplot([16,2,6], sharex=ax_pn, ylim=(-7, 7))
-ax_we    = fig_plots.add_subplot([16,2,7], sharex=ax_pn, ylim=(-7, 7))
+ax_pn    = fig_plots1.add_subplot([16,1,1], xlim=(0, 4), ylim=(-7, 7))
+ax_pe    = fig_plots1.add_subplot([16,1,2], sharex=ax_pn, ylim=(-7, 7))
+ax_pd    = fig_plots1.add_subplot([16,1,3], sharex=ax_pn, ylim=(-7, 7))
+ax_Va    = fig_plots1.add_subplot([16,1,4], sharex=ax_pn, ylim=(-7, 7))
+ax_alpha = fig_plots1.add_subplot([16,1,5], sharex=ax_pn, ylim=(-7, 7))
+ax_beta  = fig_plots1.add_subplot([16,1,6], sharex=ax_pn, ylim=(-7, 7))
+ax_phi   = fig_plots1.add_subplot([16,1,7], sharex=ax_pn, ylim=(-7, 7))
+ax_theta = fig_plots1.add_subplot([16,2,8], sharex=ax_pn, ylim=(-7, 7))
+ax_psi   = fig_plots2.add_subplot([16,1,8], sharex=ax_pn, ylim=(-7, 7))
+ax_chi   = fig_plots2.add_subplot([16,2,1], sharex=ax_pn, ylim=(-7, 7))
+ax_p     = fig_plots2.add_subplot([16,2,2], sharex=ax_pn, ylim=(-7, 7))
+ax_q     = fig_plots2.add_subplot([16,2,3], sharex=ax_pn, ylim=(-7, 7))
+ax_r     = fig_plots2.add_subplot([16,2,4], sharex=ax_pn, ylim=(-7, 7))
+ax_Vg    = fig_plots2.add_subplot([16,2,5], sharex=ax_pn, ylim=(-7, 7))
+ax_wn    = fig_plots2.add_subplot([16,2,6], sharex=ax_pn, ylim=(-7, 7))
+ax_we    = fig_plots2.add_subplot([16,2,7], sharex=ax_pn, ylim=(-7, 7))
 
 ax_pn.grid()
 ax_pe.grid()
@@ -212,7 +212,7 @@ we_max    = 7.0
 we_min    =-7.0
 axis_xlim = 0.0
 
-def init_plot():
+def init_plot1():
     """initialize animation"""
     line_pn.set_data([], [])
     line_pe.set_data([], [])
@@ -231,15 +231,14 @@ def init_plot():
     line_wn.set_data([], [])
     line_we.set_data([], [])
 
-    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta, line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
+    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta
 
-def animate_plot(i):
+def animate_plot1(i):
     """perform animation step"""
 
-    global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, psi_data, chi_data, p_data, q_data, r_data, Vg_data, wn_data, we_data, time_data
-    global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, ax_psi, ax_chi, ax_p, ax_q, ax_r, ax_Vg, ax_wn, ax_we, fig_plots
-    global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min
-    global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim   
+    global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, time_data
+    global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
+    global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim   
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
     pn_data     = np.append(states.pn)
     pe_data     = np.append(states.pe)
@@ -249,14 +248,6 @@ def animate_plot(i):
     beta_data   = np.append(states.beta)
     phi_data    = np.append(states.phi)
     theta_data  = np.append(states.theta)
-    psi_data    = np.append(states.psi)
-    chi_data    = np.append(states.chi)
-    p_data      = np.append(states.p)
-    q_data      = np.append(states.q)
-    r_data      = np.append(states.r)
-    Vg_data     = np.append(states.Vg)
-    wn_data     = np.append(states.wn)
-    we_data     = np.append(states.we)
     time_data   = np.append(states.time)
     
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
@@ -354,7 +345,59 @@ def animate_plot(i):
         theta_max = theta_data.max() + 1.0
         ax_theta.set_ylim(theta_min, theta_max)
         need_to_plot = True
+
+    # update the plot if any of the axis limits have changed
+    if need_to_plot:
+        fig_plots1.show()
+
+    line_pn.set_data(plot_time,     pn_data   )
+    line_pe.set_data(plot_time,     pe_data   )
+    line_pd.set_data(plot_time,     pd_data   )
+    line_Va.set_data(plot_time,     Va_data   )
+    line_alpha.set_data(plot_time,  alpha_data)
+    line_beta.set_data(plot_time,   beta_data )
+    line_phi.set_data(plot_time,    phi_data  )
+    line_theta.set_data(plot_time,  theta_data)
+    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta
+
+def init_plot2():
+    """initialize animation"""
+    line_psi.set_data([], [])
+    line_chi.set_data([], [])
+    line_p.set_data([], [])
+    line_q.set_data([], [])
+    line_r.set_data([], [])
+    line_Vg.set_data([], [])
+    line_wn.set_data([], [])
+    line_we.set_data([], [])
+
+    return line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
+
+def animate_plot2(i):
+    """perform animation step"""
+
+    global states, psi_data, chi_data, p_data, q_data, r_data, Vg_data, wn_data, we_data, time_data
+    global ax_psi, ax_chi, ax_p, ax_q, ax_r, ax_Vg, ax_wn, ax_we, fig_plots2
+    global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim   
+    # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
+    psi_data    = np.append(states.psi)
+    chi_data    = np.append(states.chi)
+    p_data      = np.append(states.p)
+    q_data      = np.append(states.q)
+    r_data      = np.append(states.r)
+    Vg_data     = np.append(states.Vg)
+    wn_data     = np.append(states.wn)
+    we_data     = np.append(states.we)
+    time_data   = np.append(states.time)
     
+    # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
+    need_to_plot = False
+    if(states.time > axis_xlim):
+        axis_xlim += 2.0 # this number moves the x axis of all plots by a given amount
+        ax_pn.set_xlim(0, axis_xlim)
+        need_to_plot = True
+
+    # update the y-axis of each plot by a certain amount if the max or min is going off the plot
     # psi check
     if(psi_min > psi_data.min()):
         psi_min = psi_data.min() - 1.0
@@ -445,16 +488,8 @@ def animate_plot(i):
 
     # update the plot if any of the axis limits have changed
     if need_to_plot:
-        fig_plots.show()
+        fig_plots2.show()
 
-    line_pn.set_data(plot_time,     pn_data   )
-    line_pe.set_data(plot_time,     pe_data   )
-    line_pd.set_data(plot_time,     pd_data   )
-    line_Va.set_data(plot_time,     Va_data   )
-    line_alpha.set_data(plot_time,  alpha_data)
-    line_beta.set_data(plot_time,   beta_data )
-    line_phi.set_data(plot_time,    phi_data  )
-    line_theta.set_data(plot_time,  theta_data)
     line_psi.set_data(plot_time,    psi_data  )
     line_chi.set_data(plot_time,    chi_data  )
     line_p.set_data(plot_time,      p_data    )
@@ -463,17 +498,20 @@ def animate_plot(i):
     line_Vg.set_data(plot_time,     Vg_data   )
     line_wn.set_data(plot_time,     wn_data   )
     line_we.set_data(plot_time,     we_data   )
-    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta, line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
+    return line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
 
 # choose the interval based on dt and the time to animate one step
 from time import time
 t0 = time()
-animate_plot(0)
+animate_plot1(0)
+animate_plot2(0)
 t1 = time()
 interval = 1000 * (1./30.) - (t1 - t0)
 
-ani_plot = animation.FuncAnimation(fig_plots, animate_plot, frames=300,
-                              interval=interval, blit=True, init_func=init_plot)
+ani1_plot = animation.FuncAnimation(fig_plots1, animate_plot1, frames=300,
+                                interval=interval1, blit=True, init_func=init_plot1)
+ani2_plot = animation.FuncAnimation(fig_plots2, animate_plot2, frames=300,
+                                interval=interval2, blit=True, init_func=init_plot2)
 
 plt.show()
 	
