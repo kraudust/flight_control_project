@@ -74,7 +74,7 @@ class state_subscriber():
 		
 	def plotter(self):
 		#plotter code goes here
-		nothing = self.pn #just put this here so the code wouldn't cry.. delete later
+		print self.pn
 		
 if __name__ == '__main__':	
 	rospy.init_node('plotter', anonymous=True)
