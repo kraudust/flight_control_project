@@ -16,23 +16,23 @@ class state_subscriber():
 
 	def __init__(self):
 		#----------------------States-------------------------------
-		self.pn = None	
-		self.pe = None
-		self.pd = None
-		self.Va = None
-		self.alpha = None
-		self.beta = None
-		self.phi = None
-		self.theta = None
-		self.psi = None
-		self.chi = None
-		self.p = None
-		self.q = None
-		self.r = None
-		self.Vg = None
-		self.wn = None
-		self.we = None
-		self.time = None
+		self.pn = 0.
+		self.pe = 0.
+		self.pd = 0.
+		self.Va = 0.
+		self.alpha = 0.
+		self.beta = 0.
+		self.phi = 0.
+		self.theta = 0.
+		self.psi = 0.
+		self.chi = 0.
+		self.p = 0.
+		self.q = 0.
+		self.r = 0.
+		self.Vg = 0.
+		self.wn = 0.
+		self.we = 0.
+		self.time = 0.
 		#------------------------------------------------------------
 		rospy.Subscriber("/junker/truth", FW_State, self.callback)
 		rospy.Subscriber("/clock", Clock, self.callback_time)
@@ -57,7 +57,7 @@ class state_subscriber():
 		self.we = FW_State.we
 		
 	def callback_time(self, Clock):
-		self.time = Clock.clock
+		self.time = Clock.clock.to_sec()
 		
 	def print_states(self):
 		print "pn: ", self.pn
@@ -89,22 +89,22 @@ states = state_subscriber()
 fig_plots1 = plt.figure()
 fig_plots2 = plt.figure()
 
-ax_pn    = fig_plots1.add_subplot([16,1,1], xlim=(0, 4), ylim=(-7, 7))
-ax_pe    = fig_plots1.add_subplot([16,1,2], sharex=ax_pn, ylim=(-7, 7))
-ax_pd    = fig_plots1.add_subplot([16,1,3], sharex=ax_pn, ylim=(-7, 7))
-ax_Va    = fig_plots1.add_subplot([16,1,4], sharex=ax_pn, ylim=(-7, 7))
-ax_alpha = fig_plots1.add_subplot([16,1,5], sharex=ax_pn, ylim=(-7, 7))
-ax_beta  = fig_plots1.add_subplot([16,1,6], sharex=ax_pn, ylim=(-7, 7))
-ax_phi   = fig_plots1.add_subplot([16,1,7], sharex=ax_pn, ylim=(-7, 7))
-ax_theta = fig_plots1.add_subplot([16,2,8], sharex=ax_pn, ylim=(-7, 7))
-ax_psi   = fig_plots2.add_subplot([16,1,8], sharex=ax_pn, ylim=(-7, 7))
-ax_chi   = fig_plots2.add_subplot([16,2,1], sharex=ax_pn, ylim=(-7, 7))
-ax_p     = fig_plots2.add_subplot([16,2,2], sharex=ax_pn, ylim=(-7, 7))
-ax_q     = fig_plots2.add_subplot([16,2,3], sharex=ax_pn, ylim=(-7, 7))
-ax_r     = fig_plots2.add_subplot([16,2,4], sharex=ax_pn, ylim=(-7, 7))
-ax_Vg    = fig_plots2.add_subplot([16,2,5], sharex=ax_pn, ylim=(-7, 7))
-ax_wn    = fig_plots2.add_subplot([16,2,6], sharex=ax_pn, ylim=(-7, 7))
-ax_we    = fig_plots2.add_subplot([16,2,7], sharex=ax_pn, ylim=(-7, 7))
+ax_pn    = fig_plots1.add_subplot(811, xlim=(0, 4), ylim=(-7, 7))
+ax_pe    = fig_plots1.add_subplot(812, sharex=ax_pn, ylim=(-7, 7))
+ax_pd    = fig_plots1.add_subplot(813, sharex=ax_pn, ylim=(-7, 7))
+ax_Va    = fig_plots1.add_subplot(814, sharex=ax_pn, ylim=(-7, 7))
+ax_alpha = fig_plots1.add_subplot(815, sharex=ax_pn, ylim=(-7, 7))
+ax_beta  = fig_plots1.add_subplot(816, sharex=ax_pn, ylim=(-7, 7))
+ax_phi   = fig_plots1.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
+ax_theta = fig_plots1.add_subplot(818, sharex=ax_pn, ylim=(-7, 7))
+ax_psi   = fig_plots2.add_subplot(811, sharex=ax_pn, ylim=(-7, 7))
+ax_chi   = fig_plots2.add_subplot(812, sharex=ax_pn, ylim=(-7, 7))
+ax_p     = fig_plots2.add_subplot(813, sharex=ax_pn, ylim=(-7, 7))
+ax_q     = fig_plots2.add_subplot(814, sharex=ax_pn, ylim=(-7, 7))
+ax_r     = fig_plots2.add_subplot(815, sharex=ax_pn, ylim=(-7, 7))
+ax_Vg    = fig_plots2.add_subplot(816, sharex=ax_pn, ylim=(-7, 7))
+ax_wn    = fig_plots2.add_subplot(817, sharex=ax_pn, ylim=(-7, 7))
+ax_we    = fig_plots2.add_subplot(818, sharex=ax_pn, ylim=(-7, 7))
 
 ax_pn.grid()
 ax_pe.grid()
@@ -139,9 +139,6 @@ line_r,     = ax_r.plot([], [])
 line_Vg,    = ax_Vg.plot([], [])
 line_wn,    = ax_wn.plot([], [])
 line_we,    = ax_we.plot([], [])
-
-ax_theta1.set_xlabel('time (s)')
-ax_theta1.set_ylabel('theta1')
 
 ax_pn.set_ylabel('pn')
 ax_pe.set_ylabel('pe')
@@ -240,15 +237,17 @@ def animate_plot1(i):
     global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
     global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim   
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
-    pn_data     = np.append(states.pn)
-    pe_data     = np.append(states.pe)
-    pd_data     = np.append(states.pd)
-    Va_data     = np.append(states.Va)
-    alpha_data  = np.append(states.alpha)
-    beta_data   = np.append(states.beta)
-    phi_data    = np.append(states.phi)
-    theta_data  = np.append(states.theta)
-    time_data   = np.append(states.time)
+    pn_data     = np.append(pn_data, states.pn)
+    print np.size(pn_data)
+    print pn_data
+    pe_data     = np.append(pe_data, states.pe)
+    pd_data     = np.append(pd_data, states.pd)
+    Va_data     = np.append(Va_data, states.Va)
+    alpha_data  = np.append(alpha_data, states.alpha)
+    beta_data   = np.append(beta_data, states.beta)
+    phi_data    = np.append(phi_data, states.phi)
+    theta_data  = np.append(theta_data, states.theta)
+    time_data   = np.append(time_data, states.time)
     
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
     need_to_plot = False
@@ -350,14 +349,14 @@ def animate_plot1(i):
     if need_to_plot:
         fig_plots1.show()
 
-    line_pn.set_data(plot_time,     pn_data   )
-    line_pe.set_data(plot_time,     pe_data   )
-    line_pd.set_data(plot_time,     pd_data   )
-    line_Va.set_data(plot_time,     Va_data   )
-    line_alpha.set_data(plot_time,  alpha_data)
-    line_beta.set_data(plot_time,   beta_data )
-    line_phi.set_data(plot_time,    phi_data  )
-    line_theta.set_data(plot_time,  theta_data)
+    line_pn.set_data(time_data,     pn_data   )
+    line_pe.set_data(time_data,     pe_data   )
+    line_pd.set_data(time_data,     pd_data   )
+    line_Va.set_data(time_data,     Va_data   )
+    line_alpha.set_data(time_data,  alpha_data)
+    line_beta.set_data(time_data,   beta_data )
+    line_phi.set_data(time_data,    phi_data  )
+    line_theta.set_data(time_data,  theta_data)
     return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta
 
 def init_plot2():
@@ -380,15 +379,14 @@ def animate_plot2(i):
     global ax_psi, ax_chi, ax_p, ax_q, ax_r, ax_Vg, ax_wn, ax_we, fig_plots2
     global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim   
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
-    psi_data    = np.append(states.psi)
-    chi_data    = np.append(states.chi)
-    p_data      = np.append(states.p)
-    q_data      = np.append(states.q)
-    r_data      = np.append(states.r)
-    Vg_data     = np.append(states.Vg)
-    wn_data     = np.append(states.wn)
-    we_data     = np.append(states.we)
-    time_data   = np.append(states.time)
+    psi_data    = np.append(psi_data, states.psi)
+    chi_data    = np.append(chi_data, states.chi)
+    p_data      = np.append(p_data, states.p)
+    q_data      = np.append(q_data, states.q)
+    r_data      = np.append(r_data, states.r)
+    Vg_data     = np.append(Vg_data, states.Vg)
+    wn_data     = np.append(wn_data, states.wn)
+    we_data     = np.append(we_data, states.we)
     
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
     need_to_plot = False
@@ -490,14 +488,14 @@ def animate_plot2(i):
     if need_to_plot:
         fig_plots2.show()
 
-    line_psi.set_data(plot_time,    psi_data  )
-    line_chi.set_data(plot_time,    chi_data  )
-    line_p.set_data(plot_time,      p_data    )
-    line_q.set_data(plot_time,      q_data    )
-    line_r.set_data(plot_time,      r_data    )
-    line_Vg.set_data(plot_time,     Vg_data   )
-    line_wn.set_data(plot_time,     wn_data   )
-    line_we.set_data(plot_time,     we_data   )
+    line_psi.set_data(time_data,    psi_data  )
+    line_chi.set_data(time_data,    chi_data  )
+    line_p.set_data(time_data,      p_data    )
+    line_q.set_data(time_data,      q_data    )
+    line_r.set_data(time_data,      r_data    )
+    line_Vg.set_data(time_data,     Vg_data   )
+    line_wn.set_data(time_data,     wn_data   )
+    line_we.set_data(time_data,     we_data   )
     return line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
 
 # choose the interval based on dt and the time to animate one step
@@ -509,12 +507,12 @@ t1 = time()
 interval = 1000 * (1./30.) - (t1 - t0)
 
 ani1_plot = animation.FuncAnimation(fig_plots1, animate_plot1, frames=300,
-                                interval=interval1, blit=True, init_func=init_plot1)
+                                interval=interval, blit=True, init_func=init_plot1)
 ani2_plot = animation.FuncAnimation(fig_plots2, animate_plot2, frames=300,
-                                interval=interval2, blit=True, init_func=init_plot2)
+                                interval=interval, blit=True, init_func=init_plot2)
 
 plt.show()
-	
+'''
 rate = rospy.Rate(states.rate)
 
 try:
@@ -522,4 +520,5 @@ try:
 		states.print_states()
 		rate.sleep()
 except rospy.ROSInterruptException:
-	pass	
+	pass
+'''	
