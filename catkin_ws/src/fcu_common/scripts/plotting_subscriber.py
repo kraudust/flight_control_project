@@ -4,6 +4,13 @@ import rospy
 #from std_msgs.msg import String
 from fcu_common.msg import FW_State
 
+#stuff we need for plotting
+from numpy import sin, cos
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.integrate as integrate
+import matplotlib.animation as animation
+
 class state_subscriber():
 
 	def __init__(self):
@@ -24,6 +31,7 @@ class state_subscriber():
 		self.Vg = None
 		self.wn = None
 		self.we = None
+        self.time = None
 		#------------------------------------------------------------
 		
 		self.rate = 10 # 10 hz
@@ -72,18 +80,405 @@ class state_subscriber():
 		print "wn:", self.wn
 		print "we:", self.we, '\n'
 		
-	def plotter(self):
-		#plotter code goes here
-		print self.pn
-		
-if __name__ == '__main__':	
-	rospy.init_node('plotter', anonymous=True)
-	states = state_subscriber()
-	rate = rospy.Rate(states.rate)
+rospy.init_node('plotter', anonymous=True)
+states = state_subscriber()
+#------------------------------------------------------------
+# set up figure and animation for plotting of pendulum states
+fig_plots = plt.figure()
 
-	try:
-		while not rospy.is_shutdown():
-			states.print_states()
-			rate.sleep()
-	except rospy.ROSInterruptException:
-		pass	
+ax_pn    = fig_plots.add_subplot([16,1,1], xlim=(0, 4), ylim=(-7, 7))
+ax_pe    = fig_plots.add_subplot([16,1,2], sharex=ax_pn, ylim=(-7, 7))
+ax_pd    = fig_plots.add_subplot([16,1,3], sharex=ax_pn, ylim=(-7, 7))
+ax_Va    = fig_plots.add_subplot([16,1,4], sharex=ax_pn, ylim=(-7, 7))
+ax_alpha = fig_plots.add_subplot([16,1,5], sharex=ax_pn, ylim=(-7, 7))
+ax_beta  = fig_plots.add_subplot([16,1,6], sharex=ax_pn, ylim=(-7, 7))
+ax_phi   = fig_plots.add_subplot([16,1,7], sharex=ax_pn, ylim=(-7, 7))
+ax_theta = fig_plots.add_subplot([16,2,8], sharex=ax_pn, ylim=(-7, 7))
+ax_psi   = fig_plots.add_subplot([16,1,8], sharex=ax_pn, ylim=(-7, 7))
+ax_chi   = fig_plots.add_subplot([16,2,1], sharex=ax_pn, ylim=(-7, 7))
+ax_p     = fig_plots.add_subplot([16,2,2], sharex=ax_pn, ylim=(-7, 7))
+ax_q     = fig_plots.add_subplot([16,2,3], sharex=ax_pn, ylim=(-7, 7))
+ax_r     = fig_plots.add_subplot([16,2,4], sharex=ax_pn, ylim=(-7, 7))
+ax_Vg    = fig_plots.add_subplot([16,2,5], sharex=ax_pn, ylim=(-7, 7))
+ax_wn    = fig_plots.add_subplot([16,2,6], sharex=ax_pn, ylim=(-7, 7))
+ax_we    = fig_plots.add_subplot([16,2,7], sharex=ax_pn, ylim=(-7, 7))
+
+ax_pn.grid()
+ax_pe.grid()
+ax_pd.grid()
+ax_Va.grid()
+ax_alpha.grid()
+ax_beta.grid()
+ax_phi.grid()
+ax_theta.grid()
+ax_psi.grid()
+ax_chi.grid()
+ax_p.grid()
+ax_q.grid()
+ax_r.grid()
+ax_Vg.grid()
+ax_wn.grid()
+ax_we.grid()
+
+line_pn,    = ax_pn.plot([], [])
+line_pe,    = ax_pe.plot([], [])
+line_pd,    = ax_pd.plot([], [])
+line_Va,    = ax_Va.plot([], [])
+line_alpha, = ax_alpha.plot([], [])
+line_beta,  = ax_beta.plot([], [])
+line_phi,   = ax_phi.plot([], [])
+line_theta, = ax_theta.plot([], [])
+line_psi,   = ax_psi.plot([], [])
+line_chi,   = ax_chi.plot([], [])
+line_p,     = ax_p.plot([], [])
+line_q,     = ax_q.plot([], [])
+line_r,     = ax_r.plot([], [])
+line_Vg,    = ax_Vg.plot([], [])
+line_wn,    = ax_wn.plot([], [])
+line_we,    = ax_we.plot([], [])
+
+ax_theta1.set_xlabel('time (s)')
+ax_theta1.set_ylabel('theta1')
+
+ax_pn.set_ylabel('pn')
+ax_pe.set_ylabel('pe')
+ax_pd.set_ylabel('pd')
+ax_Va.set_ylabel('Va')
+ax_alpha.set_ylabel(u'\u0391')
+ax_beta.set_ylabel(u'\u0392')
+ax_phi.set_ylabel(u'\u03A6')
+ax_theta.set_ylabel(u'u\0398')
+ax_psi.set_ylabel(u'u\03C8')
+ax_chi.set_ylabel(u'\u03A7')
+ax_p.set_ylabel('p')
+ax_q.set_ylabel('q')
+ax_r.set_ylabel('r')
+ax_Vg.set_ylabel('Vg')
+ax_wn.set_ylabel('wn')
+ax_we.set_ylabel('we')
+
+pn_data     = np.array([])
+pe_data     = np.array([])
+pd_data     = np.array([])
+Va_data     = np.array([])
+alpha_data  = np.array([])
+beta_data   = np.array([])
+phi_data    = np.array([])
+theta_data  = np.array([])
+psi_data    = np.array([])
+chi_data    = np.array([])
+p_data      = np.array([])
+q_data      = np.array([])
+r_data      = np.array([])
+Vg_data     = np.array([])
+wn_data     = np.array([])
+we_data     = np.array([])
+time_data   = np.array([])
+# the following variables keep track of our axis limits so we can scale them when needed
+pn_max    = 7.0
+pn_min    =-7.0
+pe_max    = 7.0
+pe_min    =-7.0
+pd_max    = 7.0
+pd_min    =-7.0
+Va_max    = 7.0
+Va_min    =-7.0
+alpha_max = 7.0
+alpha_min =-7.0
+beta_max  = 7.0
+beta_min  =-7.0
+phi_max   = 7.0
+phi_min   =-7.0
+theta_max = 7.0
+theta_min =-7.0
+psi_max   = 7.0
+psi_min   =-7.0
+chi_max   = 7.0
+chi_min   =-7.0
+p_max     = 7.0
+p_min     =-7.0
+q_max     = 7.0
+q_min     =-7.0
+r_max     = 7.0
+r_min     =-7.0
+Vg_max    = 7.0
+Vg_min    =-7.0
+wn_max    = 7.0
+wn_min    =-7.0
+we_max    = 7.0
+we_min    =-7.0
+axis_xlim = 0.0
+
+def init_plot():
+    """initialize animation"""
+    line_pn.set_data([], [])
+    line_pe.set_data([], [])
+    line_pd.set_data([], [])
+    line_Va.set_data([], [])
+    line_alpha.set_data([], [])
+    line_beta.set_data([], [])
+    line_phi.set_data([], [])
+    line_theta.set_data([], [])
+    line_psi.set_data([], [])
+    line_chi.set_data([], [])
+    line_p.set_data([], [])
+    line_q.set_data([], [])
+    line_r.set_data([], [])
+    line_Vg.set_data([], [])
+    line_wn.set_data([], [])
+    line_we.set_data([], [])
+
+    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta, line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
+
+def animate_plot(i):
+    """perform animation step"""
+
+    global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, psi_data, chi_data, p_data, q_data, r_data, Vg_data, wn_data, we_data, time_data
+    global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, ax_psi, ax_chi, ax_p, ax_q, ax_r, ax_Vg, ax_wn, ax_we, fig_plots
+    global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min
+    global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim   
+    # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
+    pn_data     = np.append(states.pn)
+    pe_data     = np.append(states.pe)
+    pd_data     = np.append(states.pd)
+    Va_data     = np.append(states.Va)
+    alpha_data  = np.append(states.alpha)
+    beta_data   = np.append(states.beta)
+    phi_data    = np.append(states.phi)
+    theta_data  = np.append(states.theta)
+    psi_data    = np.append(states.psi)
+    chi_data    = np.append(states.chi)
+    p_data      = np.append(states.p)
+    q_data      = np.append(states.q)
+    r_data      = np.append(states.r)
+    Vg_data     = np.append(states.Vg)
+    wn_data     = np.append(states.wn)
+    we_data     = np.append(states.we)
+    time_data   = np.append(states.time)
+    
+    # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
+    need_to_plot = False
+    if(states.time > axis_xlim):
+        axis_xlim += 2.0 # this number moves the x axis of all plots by a given amount
+        ax_pn.set_xlim(0, axis_xlim)
+        need_to_plot = True
+
+    # update the y-axis of each plot by a certain amount if the max or min is going off the plot
+    # pn check
+    if(pn_min > pn_data.min()):
+        pn_min = pn_data.min() - 1.0
+        ax_pn.set_ylim(pn_min, pn_max)
+        need_to_plot = True
+
+    if(pn_max < pn_data.max()):
+        pn_max = pn_data.max() + 1.0
+        ax_pn.set_ylim(pn_min, pn_max)
+        need_to_plot = True
+
+    # pe check
+    if(pe_min > pe_data.min()):
+        pe_min = pe_data.min() - 1.0
+        ax_pe.set_ylim(pe_min, pe_max)
+        need_to_plot = True
+
+    if(pe_max < pe_data.max()):
+        pe_max = pe_data.max() + 1.0
+        ax_pe.set_ylim(pe_min, pe_max)
+        need_to_plot = True
+
+    # pd check
+    if(pd_min > pd_data.min()):
+        pd_min = pd_data.min() - 1.0
+        ax_pd.set_ylim(pd_min, pd_max)
+        need_to_plot = True
+
+    if(pd_max < pd_data.max()):
+        pd_max = pd_data.max() + 1.0
+        ax_pd.set_ylim(pd_min, pd_max)
+        need_to_plot = True
+
+    # Va check
+    if(Va_min > Va_data.min()):
+        Va_min = Va_data.min() - 1.0
+        ax_Va.set_ylim(Va_min, Va_max)
+        need_to_plot = True
+
+    if(Va_max < Va_data.max()):
+        Va_max = Va_data.max() + 1.0
+        ax_Va.set_ylim(Va_min, Va_max)
+        need_to_plot = True
+        
+    # alpha check
+    if(alpha_min > alpha_data.min()):
+        alpha_min = alpha_data.min() - 1.0
+        ax_alpha.set_ylim(alpha_min, alpha_max)
+        need_to_plot = True
+
+    if(alpha_max < alpha_data.max()):
+        alpha_max = alpha_data.max() + 1.0
+        ax_alpha.set_ylim(alpha_min, alpha_max)
+        need_to_plot = True
+
+    # beta check
+    if(beta_min > beta_data.min()):
+        beta_min = beta_data.min() - 1.0
+        ax_beta.set_ylim(beta_min, beta_max)
+        need_to_plot = True
+
+    if(beta_max < beta_data.max()):
+        beta_max = beta_data.max() + 1.0
+        ax_beta.set_ylim(beta_min, beta_max)
+        need_to_plot = True
+
+    # phi check
+    if(phi_min > phi_data.min()):
+        phi_min = phi_data.min() - 1.0
+        ax_phi.set_ylim(phi_min, phi_max)
+        need_to_plot = True
+
+    if(phi_max < phi_data.max()):
+        phi_max = phi_data.max() + 1.0
+        ax_phi.set_ylim(phi_min, phi_max)
+        need_to_plot = True
+
+    # theta check
+    if(theta_min > theta_data.min()):
+        theta_min = theta_data.min() - 1.0
+        ax_theta.set_ylim(theta_min, theta_max)
+        need_to_plot = True
+
+    if(theta_max < theta_data.max()):
+        theta_max = theta_data.max() + 1.0
+        ax_theta.set_ylim(theta_min, theta_max)
+        need_to_plot = True
+    
+    # psi check
+    if(psi_min > psi_data.min()):
+        psi_min = psi_data.min() - 1.0
+        ax_psi.set_ylim(psi_min, psi_max)
+        need_to_plot = True
+
+    if(psi_max < psi_data.max()):
+        psi_max = psi_min.max() + 1.0
+        ax_psi.set_ylim(psi_min, psi_max)
+        need_to_plot = True
+
+    # chi check
+    if(chi_min > chi_data.min()):
+        chi_min = chi_data.min() - 1.0
+        ax_chi.set_ylim(chi_min, chi_max)
+        need_to_plot = True
+
+    if(chi_max < chi_data.max()):
+        chi_max = chi_data.max() + 1.0
+        ax_chi.set_ylim(chi_min, chi_max)
+        need_to_plot = True
+
+    # p check
+    if(p_min > p_data.min()):
+        p_min = p_data.min() - 1.0
+        ax_p.set_ylim(p_min, p_max)
+        need_to_plot = True
+
+    if(p_max < p_data.max()):
+        p_max = p_data.max() + 1.0
+        ax_p.set_ylim(p_min, p_max)
+        need_to_plot = True
+
+    # q check
+    if(q_min > q_data.min()):
+        q_min = q_data.min() - 1.0
+        ax_q.set_ylim(q_min, q_max)
+        need_to_plot = True
+
+    if(q_max < q_data.max()):
+        q_max = q_data.max() + 1.0
+        ax_q.set_ylim(q_min, q_max)
+        need_to_plot = True
+    
+    # r check
+    if(r_min > r_data.min()):
+        r_min = r_data.min() - 1.0
+        ax_r.set_ylim(r_min, r_max)
+        need_to_plot = True
+
+    if(r_max < r_data.max()):
+        r_max = r_min.max() + 1.0
+        ax_r.set_ylim(r_min, r_max)
+        need_to_plot = True
+
+    # Vg check
+    if(Vg_min > Vg_data.min()):
+        Vg_min = Vg_data.min() - 1.0
+        ax_Vg.set_ylim(Vg_min, Vg_max)
+        need_to_plot = True
+
+    if(Vg_max < Vg_data.max()):
+        Vg_max = Vg_data.max() + 1.0
+        ax_Vg.set_ylim(Vg_min, Vg_max)
+        need_to_plot = True
+
+    # wn check
+    if(wn_min > wn_data.min()):
+        wn_min = wn_data.min() - 1.0
+        ax_wn.set_ylim(wn_min, wn_max)
+        need_to_plot = True
+
+    if(wn_max < wn_data.max()):
+        wn_max = wn_data.max() + 1.0
+        ax_wn.set_ylim(wn_min, wn_max)
+        need_to_plot = True
+
+    # we check
+    if(we_min > we_data.min()):
+        we_min = we_data.min() - 1.0
+        ax_we.set_ylim(we_min, we_max)
+        need_to_plot = True
+
+    if(we_max < we_data.max()):
+        we_max = we_data.max() + 1.0
+        ax_we.set_ylim(we_min, we_max)
+        need_to_plot = True
+
+    # update the plot if any of the axis limits have changed
+    if need_to_plot:
+        fig_plots.show()
+
+    line_pn.set_data(plot_time,     pn_data   )
+    line_pe.set_data(plot_time,     pe_data   )
+    line_pd.set_data(plot_time,     pd_data   )
+    line_Va.set_data(plot_time,     Va_data   )
+    line_alpha.set_data(plot_time,  alpha_data)
+    line_beta.set_data(plot_time,   beta_data )
+    line_phi.set_data(plot_time,    phi_data  )
+    line_theta.set_data(plot_time,  theta_data)
+    line_psi.set_data(plot_time,    psi_data  )
+    line_chi.set_data(plot_time,    chi_data  )
+    line_p.set_data(plot_time,      p_data    )
+    line_q.set_data(plot_time,      q_data    )
+    line_r.set_data(plot_time,      r_data    )
+    line_Vg.set_data(plot_time,     Vg_data   )
+    line_wn.set_data(plot_time,     wn_data   )
+    line_we.set_data(plot_time,     we_data   )
+    return line_pn, line_pe, line_pd, line_Va, line_alpha, line_beta, line_phi, line_theta, line_psi, line_chi, line_p, line_q, line_r, line_Vg, line_wn, line_we
+
+# choose the interval based on dt and the time to animate one step
+from time import time
+t0 = time()
+animate_plot(0)
+t1 = time()
+interval = 1000 * dt - (t1 - t0)
+
+ani_plot = animation.FuncAnimation(fig_plots, animate_plot, frames=300,
+                              interval=interval, blit=True, init_func=init_plot)
+
+plt.show()
+	
+rate = rospy.Rate(states.rate)
+
+try:
+	while not rospy.is_shutdown():
+		states.print_states()
+		rate.sleep()
+except rospy.ROSInterruptException:
+	pass	
