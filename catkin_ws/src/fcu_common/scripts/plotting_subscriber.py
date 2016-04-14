@@ -6,7 +6,6 @@ from fcu_common.msg import FW_State
 from rosgraph_msgs.msg import Clock
 
 #stuff we need for plotting
-from numpy import sin, cos
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as integrate
@@ -55,10 +54,10 @@ class state_subscriber():
 		self.Vg = FW_State.Vg
 		self.wn = FW_State.wn
 		self.we = FW_State.we
-		
+
 	def callback_time(self, Clock):
 		self.time = Clock.clock.to_sec()
-		
+
 	def print_states(self):
 		print "pn: ", self.pn
 		print "pe: ", self.pe
@@ -81,11 +80,11 @@ class state_subscriber():
 		    eric = 7
 		else:
 		    print "time: ", self.time.to_sec(), '\n'
-		
+
 rospy.init_node('plotter', anonymous=True)
 states = state_subscriber()
 #------------------------------------------------------------
-# set up figure and animation for plotting of pendulum states
+# set up figure and animation for plotting of states
 fig_plots1 = plt.figure()
 fig_plots2 = plt.figure()
 
@@ -174,6 +173,7 @@ Vg_data     = np.array([])
 wn_data     = np.array([])
 we_data     = np.array([])
 time_data   = np.array([])
+
 # the following variables keep track of our axis limits so we can scale them when needed
 pn_max    = 7.0
 pn_min    =-7.0
@@ -235,7 +235,7 @@ def animate_plot1(i):
 
     global states, pn_data, pe_data, pd_data, Va_data, alpha_data, beta_data, phi_data, theta_data, time_data
     global ax_pn, ax_pe, ax_pd, ax_Va, ax_alpha, ax_beta, ax_phi, ax_theta, fig_plots1, fig_plots2
-    global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim   
+    global pn_max, pn_min, pe_max, pe_min, pd_max, pd_min, Va_max, Va_min, alpha_max, alpha_min, beta_max, beta_min, phi_max, phi_min, theta_max, theta_min, axis_xlim
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
     pn_data     = np.append(pn_data, states.pn)
     print np.size(pn_data)
@@ -248,7 +248,7 @@ def animate_plot1(i):
     phi_data    = np.append(phi_data, states.phi)
     theta_data  = np.append(theta_data, states.theta)
     time_data   = np.append(time_data, states.time)
-    
+
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
     need_to_plot = False
     if(states.time > axis_xlim):
@@ -300,7 +300,7 @@ def animate_plot1(i):
         Va_max = Va_data.max() + 1.0
         ax_Va.set_ylim(Va_min, Va_max)
         need_to_plot = True
-        
+
     # alpha check
     if(alpha_min > alpha_data.min()):
         alpha_min = alpha_data.min() - 1.0
@@ -377,7 +377,7 @@ def animate_plot2(i):
 
     global states, psi_data, chi_data, p_data, q_data, r_data, Vg_data, wn_data, we_data, time_data
     global ax_psi, ax_chi, ax_p, ax_q, ax_r, ax_Vg, ax_wn, ax_we, fig_plots2
-    global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim   
+    global psi_max, psi_min, chi_max, chi_min, p_max, p_min, q_max, q_min, r_max, r_min, Vg_max, Vg_min, wn_max, wn_min, we_max, we_min, axis_xlim
     # the append function doesn't append to the array given by reference, so we have to pass it by value and simultaneously assign it to the original
     psi_data    = np.append(psi_data, states.psi)
     chi_data    = np.append(chi_data, states.chi)
@@ -387,7 +387,7 @@ def animate_plot2(i):
     Vg_data     = np.append(Vg_data, states.Vg)
     wn_data     = np.append(wn_data, states.wn)
     we_data     = np.append(we_data, states.we)
-    
+
     # update the time axis when necessary... they are all linked to the same pointer so you only need to update theta1
     need_to_plot = False
     if(states.time > axis_xlim):
@@ -439,7 +439,7 @@ def animate_plot2(i):
         q_max = q_data.max() + 1.0
         ax_q.set_ylim(q_min, q_max)
         need_to_plot = True
-    
+
     # r check
     if(r_min > r_data.min()):
         r_min = r_data.min() - 1.0
@@ -521,4 +521,4 @@ try:
 		rate.sleep()
 except rospy.ROSInterruptException:
 	pass
-'''	
+'''
