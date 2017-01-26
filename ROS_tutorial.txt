@@ -1,0 +1,6 @@
+roslaunch fcu_sim fixedwing.launch
+click play
+rostopic pub /controller_commands fcu_common/FW_Controller_Commands (tab complete and fill out the data.. 30.0 m/s)
+/junker/truth is the true states
+/state is the estimated state
+
